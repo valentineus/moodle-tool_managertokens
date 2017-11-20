@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="admin/tool/tool_managertokens/db" VERSION="20171120" COMMENT="XMLDB file for Moodle" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="tool_managertokens_tokens" COMMENT="Table of storage of tokens and information about them.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Activation and deactivation of the token." />
+                <FIELD NAME="extendedaction" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Action to be performed by token." />
+                <FIELD NAME="extendedoptions" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Options for setting up an additional action." />
+                <FIELD NAME="limited" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Limit the number of activations." />
+                <FIELD NAME="scope" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Use of the token." />
+                <FIELD NAME="targetid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Unique target ID." />
+                <FIELD NAME="targettype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Target type." />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time of record creation." />
+                <FIELD NAME="timelastuse" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The last activation." />
+                <FIELD NAME="timelimited" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Limit the life of the token." />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time to update the record." />
+                <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="A unique key." />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+        </TABLE>
+    </TABLES>
+</XMLDB>
