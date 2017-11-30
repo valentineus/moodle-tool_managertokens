@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The token editor.
+ * Page of the token editor.
  *
  * @package   tool_managertokens
  * @copyright 2017 "Valentin Popov" <info@valentineus.link>
@@ -28,10 +28,10 @@ require_once(__DIR__ . "/lib.php");
 
 require_once($CFG->libdir . "/adminlib.php");
 
-/* Optional parameters */
+/* Defines the basic parameters */
 $tokenid = optional_param("tokenid", 0, PARAM_INT);
 
-/* Link generation */
+/* Defines the main links */
 $urlparameters = array("tokenid" => $tokenid);
 $baseurl       = new moodle_url("/admin/tool/managertokens/editor.php", $urlparameters);
 $managertokens = new moodle_url("/admin/tool/managertokens/index.php");
@@ -40,7 +40,7 @@ $managertokens = new moodle_url("/admin/tool/managertokens/index.php");
 admin_externalpage_setup("tool_managertokens", "", null, $baseurl, array());
 $context = context_system::instance();
 
-/* Create an editing form */
+/* Declares the form */
 $mform = new token_editor_form($PAGE->url);
 
 /* Cancel processing */
@@ -48,9 +48,9 @@ if ($mform->is_cancelled()) {
     redirect($managertokens);
 }
 
-/* Getting the data */
+/* Loads existing data */
 $tokenrecord = new stdClass();
-if ($editing = boolval($tokenid)) {
+if ($editing = !empty($tokenid)) {
     $tokenrecord = tool_managertokens_find_record($tokenid);
     $mform->set_data($tokenrecord);
 }
@@ -60,14 +60,14 @@ if ($data = $mform->get_data()) {
     if ($editing) {
         $data->id = $tokenid;
         tool_managertokens_update_record($data);
-        redirect($managertokens, new lang_string("update", "moodle"));
     } else {
         tool_managertokens_create_record($data);
-        redirect($managertokens, new lang_string("create", "moodle"));
     }
+
+    redirect($managertokens, new lang_string("changessaved", "moodle"));
 }
 
-/* The page title */
+/* Specifies the title of the page */
 $titlepage = new lang_string("editsettings", "moodle");
 $PAGE->navbar->add($titlepage);
 $PAGE->set_heading($titlepage);
