@@ -17,14 +17,14 @@
 /**
  * Adds settings links to admin tree.
  *
- * @package tool_managertokens
+ * @package   tool_managertokens
  * @copyright 2017 "Valentin Popov" <info@valentineus.link>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined("MOODLE_INTERNAL") || die();
 
 if ($hassiteconfig) {
-    $managertokens = new moodle_url("/admin/tool/managertokens/managertokens.php");
+    $managertokens = new moodle_url("/admin/tool/managertokens/index.php");
     $ADMIN->add("accounts", new admin_externalpage("tool_managertokens", new lang_string("pluginname", "tool_managertokens"), $managertokens));
 }
