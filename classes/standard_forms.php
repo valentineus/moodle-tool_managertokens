@@ -65,6 +65,7 @@ class token_editor_form extends moodleform {
         /* Entry element of the token */
         $mform->addElement("text", "token", new lang_string("password", "moodle"));
         $mform->addRule("token", null, "required");
+        $mform->setDefault("token", generate_password(12));
         $mform->setType("token", PARAM_NOTAGS);
 
         /* State switching element */
