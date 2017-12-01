@@ -80,7 +80,7 @@ echo $OUTPUT->header();
 
 /* Adds the add button */
 $addtokenurl = new moodle_url($editor);
-echo $OUTPUT->single_button($addtokenurl, new lang_string("add", "moodle"), "get");
+echo $OUTPUT->single_button($addtokenurl, new lang_string("add", "moodle"));
 
 /* Adds a delete button */
 $deleteallurl = new moodle_url($managertokens, array("deleteall" => true, "sesskey" => sesskey()));
@@ -92,7 +92,7 @@ echo $OUTPUT->single_button($backupurl, new lang_string("backup", "moodle"), "ge
 
 /* Adds a restore button */
 $restorebackupurl = new moodle_url($restorebackup);
-echo $OUTPUT->single_button($restorebackupurl, new lang_string("restore", "moodle"), "get");
+echo $OUTPUT->single_button($restorebackupurl, new lang_string("restore", "moodle"));
 
 /* Displays the table */
 $table = new tool_managertokens_table("tool-managertokens-table");
