@@ -23,7 +23,7 @@
  */
 
 require_once(__DIR__ . "/../../../config.php");
-require_once(__DIR__ . "/classes/editor_form.php");
+require_once(__DIR__ . "/classes/standard_forms.php");
 require_once(__DIR__ . "/lib.php");
 
 require_once($CFG->libdir . "/adminlib.php");
