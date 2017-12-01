@@ -34,11 +34,11 @@ function tool_managertokens_activate_token($token = "") {
     global $DB;
 
     $select_limited     = "limited = 0 OR scope < limited";
-    $select_timelimited = "timelimited = 0 OR timelimited > " . time();
+    $select_timelimited = "timelimited = 0 OR (timecreated + timelimited) > " . time();
     $select = "enabled = 1 AND token = '$token' AND ($select_limited) AND ($select_timelimited)";
-
     if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
-        $token->scope       = intval($token->scope) + 1;
+        $token = tool_managertokens_standardization_record($token);
+        $token->scope = $token->scope + 1;
         $token->timelastuse = time();
         $DB->update_record("tool_managertokens_tokens", $token, false);
     }
@@ -46,7 +46,16 @@ function tool_managertokens_activate_token($token = "") {
     return $token;
 }
 
-/* function tool_managertokens_create_backup() {} */
+/**
+ * Creates a backup copy of the tokens.
+ *
+ * @return string
+ */
+function tool_managertokens_create_backup() {
+    $list = tool_managertokens_get_list(0, 0);
+    $archive = base64_encode(gzcompress(serialize($list), 9));
+    return $archive;
+}
 
 /**
  * Creates an entry in the database.
@@ -62,11 +71,11 @@ function tool_managertokens_create_record($options) {
     }
 
     if (!isset($options->targettype)) {
-        print_error("missingparam", "error", "", "targettype");
+        $options->targettype = "user";
     }
 
     if (!isset($options->token)) {
-        print_error("missingparam", "error", "", "token");
+        $options->token = generate_password(12);
     }
 
     if ($DB->record_exists("tool_managertokens_tokens", array("token" => $options->token))) {
@@ -77,24 +86,24 @@ function tool_managertokens_create_record($options) {
     $token->enabled      = false;
     $token->timecreated  = time();
     $token->targetid     = intval($options->targetid);
-    $token->targettype   = intval($options->targettype);
+    $token->targettype   = strval($options->targettype);
     $token->timemodified = $token->timecreated;
     $token->token        = strval($options->token);
 
-    if (isset($options->enabled)) {
+    if (!empty($options->enabled)) {
         $token->enabled = boolval($options->enabled);
     }
 
-    if (isset($options->extendedaction) && isset($options->extendedoptions)) {
-        $token->extendedaction = strval($options->extendedaction);
+    if (!empty($options->extendedaction) && !empty($options->extendedoptions)) {
+        $token->extendedaction  = strval($options->extendedaction);
         $token->extendedoptions = strval($options->extendedoptions);
     }
 
-    if (isset($options->limited)) {
+    if (!empty($options->limited)) {
         $token->limited = intval($options->limited);
     }
 
-    if (isset($options->timelimited)) {
+    if (!empty($options->timelimited)) {
         $token->timelimited = intval($options->timelimited);
     }
 
@@ -104,11 +113,13 @@ function tool_managertokens_create_record($options) {
 
 /**
  * Removes all entries in the table.
+ * Attention! All current records are deleted!
  *
  * @return boolean
  */
 function tool_managertokens_delete_all_records() {
     global $DB;
+
     $result = $DB->delete_records("tool_managertokens_tokens", null);
     return boolval($result);
 }
@@ -121,20 +132,29 @@ function tool_managertokens_delete_all_records() {
  */
 function tool_managertokens_delete_record($key = 0) {
     global $DB;
-    $select = "id = '$key' OR token = '$key'";
-    $result = $DB->delete_records_select("tool_managertokens_tokens", $select, null);
+
+    $result = false;
+    if ($token = tool_managertokens_find_record($key)) {
+        $result = $DB->delete_records("tool_managertokens_tokens", array("id" => $token->id));
+    }
+
     return boolval($result);
 }
 
 /**
  * Searches for an id or token.
  *
- * @param number|string $key
+ * @param  number|string  $key
+ * @return object|boolean
  */
 function tool_managertokens_find_record($key = 0) {
     global $DB;
+
     $select = "id = '$key' OR token = '$key'";
-    $token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING);
+    if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
+        $token = tool_managertokens_standardization_record($token);
+    }
+
     return $token;
 }
 
@@ -147,11 +167,25 @@ function tool_managertokens_find_record($key = 0) {
  */
 function tool_managertokens_get_list($limitfrom = 0, $limitnum = 0) {
     global $DB;
+
     $result = $DB->get_records("tool_managertokens_tokens", null, "id", "*", $limitfrom, $limitnum);
     return $result;
 }
 
-/* function tool_managertokens_restore_backup($backup = "") {} */
+/**
+ * Restores data from a backup.
+ * Attention! All current records are deleted!
+ *
+ * @param string $backup
+ */
+function tool_managertokens_restore_backup($backup = "") {
+    global $DB;
+
+    if ($list = unserialize(gzuncompress(base64_decode($backup)))) {
+        tool_managertokens_delete_all_records();
+        $DB->insert_records("tool_managertokens_tokens", $list);
+    }
+}
 
 /**
  * Updates the entry in the database.
@@ -204,4 +238,27 @@ function tool_managertokens_update_record($options) {
     }
 
     return boolval($result);
+}
+
+/**
+ * Standardizes the source document.
+ *
+ * @param  object $record
+ * @return object
+ */
+function tool_managertokens_standardization_record($record) {
+    $record->id              = intval($record->id);
+    $record->enabled         = boolval($record->enabled);
+    $record->extendedaction  = strval($record->extendedaction);
+    $record->extendedoptions = strval($record->extendedoptions);
+    $record->limited         = intval($record->limited);
+    $record->scope           = intval($record->scope);
+    $record->targetid        = intval($record->targetid);
+    $record->targettype      = strval($record->targettype);
+    $record->timecreated     = intval($record->timecreated);
+    $record->timelastuse     = intval($record->timelastuse);
+    $record->timelimited     = intval($record->timelimited);
+    $record->timemodified    = intval($record->timemodified);
+    $record->token           = strval($record->token);
+    return $record;
 }
