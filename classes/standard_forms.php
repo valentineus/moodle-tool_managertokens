@@ -83,6 +83,7 @@ class token_editor_form extends moodleform {
         /* The identifier element */
         $mform->addElement("text", "targetid", new lang_string("idnumbermod", "moodle"));
         $mform->addRule("targetid", null, "required");
+        $mform->setDefault("targetid", 1);
         $mform->setType("targetid", PARAM_INT);
 
         /* The header of constraints */
