@@ -33,9 +33,9 @@ defined("MOODLE_INTERNAL") || die();
 function tool_managertokens_activate_token($token = "") {
     global $DB;
 
-    $select_limited     = "limited = 0 OR scope < limited";
-    $select_timelimited = "timelimited = 0 OR (timecreated + timelimited) > " . time();
-    $select = "enabled = 1 AND token = '$token' AND ($select_limited) AND ($select_timelimited)";
+    $selectlimited     = "limited = 0 OR scope < limited";
+    $selecttimelimited = "timelimited = 0 OR (timecreated + timelimited) > " . time();
+    $select = "enabled = 1 AND token = '$token' AND ($selectlimited) AND ($selecttimelimited)";
     if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
         $token = tool_managertokens_standardization_record($token);
         $token->scope = $token->scope + 1;
