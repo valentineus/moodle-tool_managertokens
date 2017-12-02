@@ -66,7 +66,7 @@ class token_editor_form extends moodleform {
         $mform->addElement("text", "token", new lang_string("password", "moodle"));
         $mform->addRule("token", null, "required");
         $mform->setDefault("token", generate_password(12));
-        $mform->setType("token", PARAM_NOTAGS);
+        $mform->setType("token", PARAM_RAW_TRIMMED);
 
         /* State switching element */
         $mform->addElement("advcheckbox", "enabled", new lang_string("enable", "moodle"));
@@ -83,8 +83,7 @@ class token_editor_form extends moodleform {
         /* The identifier element */
         $mform->addElement("text", "targetid", new lang_string("idnumbermod", "moodle"));
         $mform->addRule("targetid", null, "required");
-        $mform->setDefault("targetid", 1);
-        $mform->setType("targetid", PARAM_INT);
+        $mform->setType("targetid", PARAM_RAW_TRIMMED);
 
         /* The header of constraints */
         $mform->addElement("header", "statsuserlogins", new lang_string("statsuserlogins", "moodle"));
