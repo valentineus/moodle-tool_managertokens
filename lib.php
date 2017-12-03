@@ -48,6 +48,25 @@ function tool_managertokens_activate_token($token = "") {
 }
 
 /**
+ * Toggles the status of an existing token.
+ *
+ * @param  number|string $key
+ * @return boolean
+ */
+function tool_managertokens_change_status($key = "") {
+    global $DB;
+
+    $result = false;
+    $select = "id = '$key' OR token = '$key'";
+    if ($DB->record_exists_select("tool_managertokens_tokens", $select, null)) {
+        $enabled = $DB->get_field_select("tool_managertokens_tokens", "enabled", $select, null, IGNORE_MISSING);
+        $result = $DB->set_field_select("tool_managertokens_tokens", "enabled", !boolval($enabled), $select, null);
+    }
+
+    return boolval($result);
+}
+
+/**
  * Creates a backup copy of the tokens.
  *
  * @return string
