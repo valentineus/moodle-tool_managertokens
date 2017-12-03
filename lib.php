@@ -24,6 +24,8 @@
 
 defined("MOODLE_INTERNAL") || die();
 
+require_once(__DIR__ . "/locallib.php");
+
 /**
  * It checks the ability to activate the token and produces it.
  *
@@ -37,8 +39,7 @@ function tool_managertokens_activate_token($token = "") {
     $selecttimelimited = "timelimited = 0 OR (timecreated + timelimited) > " . time();
     $select = "enabled = 1 AND token = '$token' AND ($selectlimited) AND ($selecttimelimited)";
     if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
-        $token = tool_managertokens_standardization_record($token);
-        $token->scope = $token->scope + 1;
+        $token->scope = intval($token->scope) + 1;
         $token->timelastuse = time();
         $DB->update_record("tool_managertokens_tokens", $token, false);
     }
@@ -67,11 +68,11 @@ function tool_managertokens_create_record($options) {
     global $DB;
 
     if (!isset($options->targetid)) {
-        print_error("missingparam", "error", "", "targetid");
+        print_error("missingparam", "error", null, "targetid");
     }
 
     if (!isset($options->targettype)) {
-        $options->targettype = "user";
+        $options->targettype = "null";
     }
 
     if (!isset($options->token)) {
@@ -79,7 +80,7 @@ function tool_managertokens_create_record($options) {
     }
 
     if ($DB->record_exists("tool_managertokens_tokens", array("token" => $options->token))) {
-        print_error("duplicatefieldname", "error", "", "token");
+        print_error("duplicatefieldname", "error", null, "token");
     }
 
     $token = new stdClass();
@@ -109,6 +110,21 @@ function tool_managertokens_create_record($options) {
 
     $recordid = $DB->insert_record("tool_managertokens_tokens", $token, true, false);
     return $recordid;
+}
+
+/**
+ * Specifies the user for authorization.
+ *
+ * @param object $token
+ */
+function tool_managertokens_definition_user($token) {
+    $user = false;
+
+    if ($token->targettype == "user") {
+        $user = core_user::get_user($token->targetid);
+    }
+
+    return $user;
 }
 
 /**
@@ -151,10 +167,7 @@ function tool_managertokens_find_record($key = 0) {
     global $DB;
 
     $select = "id = '$key' OR token = '$key'";
-    if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
-        $token = tool_managertokens_standardization_record($token);
-    }
-
+    $token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING);
     return $token;
 }
 
@@ -170,6 +183,46 @@ function tool_managertokens_get_list($limitfrom = 0, $limitnum = 0) {
 
     $result = $DB->get_records("tool_managertokens_tokens", null, "id", "*", $limitfrom, $limitnum);
     return $result;
+}
+
+/**
+ * Performs additional actions for the user.
+ *
+ * @param object $token
+ * @param object $user
+ */
+function tool_managertokens_perform_additional_action($token, $user) {
+    global $DB;
+
+    /* Redirect user */
+    if ($token->extendedaction == "redirect") {
+        $redirect = new moodle_url($token->extendedoptions);
+        redirect($redirect);
+    }
+
+    /* Enroll in the local group */
+    if ($token->extendedaction == "group") {
+        $groupid = intval($token->extendedoptions);
+        if ($DB->record_exists("groups", array("id" => $groupid))) {
+            tool_managertokens_enroll_user_for_group($user, $groupid);
+        }
+    }
+
+    /* Enroll in the global group */
+    if ($token->extendedaction == "cohort") {
+        $cohortid = intval($token->extendedoptions);
+        if ($DB->record_exists("cohort", array("id" => $cohortid))) {
+            tool_managertokens_enroll_user_for_cohort($user, $cohortid);
+        }
+    }
+
+    /* Enroll in the global course */
+    if ($token->extendedaction == "course") {
+        $courseid = intval($token->extendedoptions);
+        if ($DB->record_exists("course", array("id" => $courseid))) {
+            tool_managertokens_enroll_user_for_course($user, $courseid);
+        }
+    }
 }
 
 /**
@@ -199,7 +252,7 @@ function tool_managertokens_update_record($options) {
     $result = false;
 
     if (!isset($options->id)) {
-        print_error("missingparam", "error", "", "id");
+        print_error("missingparam", "error", null, "id");
     }
 
     if ($token = $DB->get_record("tool_managertokens_tokens", array("id" => $options->id), "*", IGNORE_MISSING)) {
@@ -238,27 +291,4 @@ function tool_managertokens_update_record($options) {
     }
 
     return boolval($result);
-}
-
-/**
- * Standardizes the source document.
- *
- * @param  object $record
- * @return object
- */
-function tool_managertokens_standardization_record($record) {
-    $record->id              = intval($record->id);
-    $record->enabled         = boolval($record->enabled);
-    $record->extendedaction  = strval($record->extendedaction);
-    $record->extendedoptions = strval($record->extendedoptions);
-    $record->limited         = intval($record->limited);
-    $record->scope           = intval($record->scope);
-    $record->targetid        = intval($record->targetid);
-    $record->targettype      = strval($record->targettype);
-    $record->timecreated     = intval($record->timecreated);
-    $record->timelastuse     = intval($record->timelastuse);
-    $record->timelimited     = intval($record->timelimited);
-    $record->timemodified    = intval($record->timemodified);
-    $record->token           = strval($record->token);
-    return $record;
 }
