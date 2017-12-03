@@ -137,6 +137,12 @@ class tool_managertokens_table extends table_sql {
     public function col_targetid($row) {
         $html = $row->targetid;
 
+        /* The role is absent */
+        if ($row->targettype == "null") {
+            $html = new lang_string("none", "moodle");
+        }
+
+        /* A role is a user */
         if ($row->targettype == "user") {
             /* Specifies the user name */
             $linktext = new lang_string("user", "moodle");
