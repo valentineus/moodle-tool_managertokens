@@ -68,12 +68,12 @@ function tool_managertokens_create_record($options) {
     global $DB;
 
     $token = new stdClass();
-    $token->enabled      = !empty($options->enabled) ? boolval($options->enabled) : false;
-    $token->limited      = !empty($options->limited) ? intval($options->limited) : 0;
-    $token->targetid     = !empty($options->targetid) ? intval($options->targetid) : 0;
-    $token->targettype   = !empty($options->targettype) ? strval($options->targettype) : "null";
+    $token->enabled      = !empty($options->enabled)     ? boolval($options->enabled)    : false;
+    $token->limited      = !empty($options->limited)     ? intval($options->limited)     : 0;
+    $token->targetid     = !empty($options->targetid)    ? intval($options->targetid)    : 0;
+    $token->targettype   = !empty($options->targettype)  ? strval($options->targettype)  : "null";
     $token->timelimited  = !empty($options->timelimited) ? intval($options->timelimited) : 0;
-    $token->token        = !empty($options->token) ? strval($options->token) : generate_password(12);
+    $token->token        = !empty($options->token)       ? strval($options->token)       : generate_password(12);
     $token->timecreated  = time();
     $token->timemodified = time();
 
