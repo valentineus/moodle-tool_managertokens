@@ -39,7 +39,7 @@ function tool_managertokens_activate_token($token = "") {
     $selecttimelimited = "timelimited = 0 OR (timecreated + timelimited) > " . time();
     $select = "enabled = 1 AND token = '$token' AND ($selectlimited) AND ($selecttimelimited)";
     if ($token = $DB->get_record_select("tool_managertokens_tokens", $select, null, "*", IGNORE_MISSING)) {
-        $token->scope = intval($token->scope) + 1;
+        $token->scope       = intval($token->scope) + 1;
         $token->timelastuse = time();
         $DB->update_record("tool_managertokens_tokens", $token, false);
     }
@@ -67,45 +67,23 @@ function tool_managertokens_create_backup() {
 function tool_managertokens_create_record($options) {
     global $DB;
 
-    if (!isset($options->targetid)) {
-        print_error("missingparam", "error", null, "targetid");
-    }
-
-    if (!isset($options->targettype)) {
-        $options->targettype = "null";
-    }
-
-    if (!isset($options->token)) {
-        $options->token = generate_password(12);
-    }
-
-    if ($DB->record_exists("tool_managertokens_tokens", array("token" => $options->token))) {
-        print_error("duplicatefieldname", "error", null, "token");
-    }
-
     $token = new stdClass();
-    $token->enabled      = false;
+    $token->enabled      = !empty($options->enabled) ? boolval($options->enabled) : false;
+    $token->limited      = !empty($options->limited) ? intval($options->limited) : 0;
+    $token->targetid     = !empty($options->targetid) ? intval($options->targetid) : 0;
+    $token->targettype   = !empty($options->targettype) ? strval($options->targettype) : "null";
     $token->timecreated  = time();
-    $token->targetid     = intval($options->targetid);
-    $token->targettype   = strval($options->targettype);
-    $token->timemodified = $token->timecreated;
-    $token->token        = strval($options->token);
-
-    if (!empty($options->enabled)) {
-        $token->enabled = boolval($options->enabled);
-    }
+    $token->timelimited  = !empty($options->timelimited) ? intval($options->timelimited) : 0;
+    $token->timemodified = time();
+    $token->token        = !empty($options->token) ? strval($options->token) : generate_password(12);
 
     if (!empty($options->extendedaction) && !empty($options->extendedoptions)) {
         $token->extendedaction  = strval($options->extendedaction);
         $token->extendedoptions = strval($options->extendedoptions);
     }
 
-    if (!empty($options->limited)) {
-        $token->limited = intval($options->limited);
-    }
-
-    if (!empty($options->timelimited)) {
-        $token->timelimited = intval($options->timelimited);
+    if ($DB->record_exists("tool_managertokens_tokens", array("token" => $token->token))) {
+        print_error("duplicatefieldname", "error", null, "token");
     }
 
     $recordid = $DB->insert_record("tool_managertokens_tokens", $token, true, false);
