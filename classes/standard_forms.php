@@ -50,12 +50,16 @@ class token_editor_form extends moodleform {
 
         /* Defines roles */
         $targettypetypes = array(
+            "null" => new lang_string("none", "moodle"),
             "user" => new lang_string("user", "moodle")
         );
 
         /* Defines additional actions */
         $extendedactiontypes = array(
-            "null" => new lang_string("none", "moodle"),
+            "cohort"   => new lang_string("cohort", "cohort"),
+            "course"   => new lang_string("course", "moodle"),
+            "group"    => new lang_string("group", "moodle"),
+            "null"     => new lang_string("none", "moodle"),
             "redirect" => new lang_string("redirect", "moodle")
         );
 
@@ -76,14 +80,13 @@ class token_editor_form extends moodleform {
 
         /* The role selection element */
         $mform->addElement("select", "targettype", new lang_string("role", "moodle"), $targettypetypes);
-        $mform->addRule("targettype", null, "required");
         $mform->setDefault("targettype", "user");
         $mform->setType("targettype", PARAM_TAG);
 
         /* The identifier element */
         $mform->addElement("text", "targetid", new lang_string("idnumbermod", "moodle"));
-        $mform->addRule("targetid", null, "required");
-        $mform->setType("targetid", PARAM_RAW_TRIMMED);
+        $mform->setDefault("targetid", 1);
+        $mform->setType("targetid", PARAM_INT);
 
         /* The header of constraints */
         $mform->addElement("header", "statsuserlogins", new lang_string("statsuserlogins", "moodle"));
