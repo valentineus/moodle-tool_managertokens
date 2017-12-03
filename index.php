@@ -65,11 +65,8 @@ if (!empty($deleteid) && confirm_sesskey()) {
 
 /* Updates an existing token */
 if (!empty($hideshowid) && confirm_sesskey()) {
-    if ($record = tool_managertokens_find_record($hideshowid)) {
-        $record->enabled = !boolval($record->enabled);
-        tool_managertokens_update_record($record);
-        redirect($baseurl, new lang_string("changessaved", "moodle"));
-    }
+    tool_managertokens_change_status($hideshowid);
+    redirect($baseurl, new lang_string("changessaved", "moodle"));
 }
 
 /* Specifies the title of the page */
