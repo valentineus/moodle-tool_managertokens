@@ -72,10 +72,10 @@ function tool_managertokens_create_record($options) {
     $token->limited      = !empty($options->limited) ? intval($options->limited) : 0;
     $token->targetid     = !empty($options->targetid) ? intval($options->targetid) : 0;
     $token->targettype   = !empty($options->targettype) ? strval($options->targettype) : "null";
-    $token->timecreated  = time();
     $token->timelimited  = !empty($options->timelimited) ? intval($options->timelimited) : 0;
-    $token->timemodified = time();
     $token->token        = !empty($options->token) ? strval($options->token) : generate_password(12);
+    $token->timecreated  = time();
+    $token->timemodified = time();
 
     if (!empty($options->extendedaction) && !empty($options->extendedoptions)) {
         $token->extendedaction  = strval($options->extendedaction);
@@ -234,35 +234,17 @@ function tool_managertokens_update_record($options) {
     }
 
     if ($token = $DB->get_record("tool_managertokens_tokens", array("id" => $options->id), "*", IGNORE_MISSING)) {
+        $token->enabled      = !empty($options->enabled)     ? boolval($options->enabled)    : false;
+        $token->limited      = !empty($options->limited)     ? intval($options->limited)     : $token->limited;
+        $token->targetid     = !empty($options->targetid)    ? intval($options->targetid)    : $token->targetid;
+        $token->targettype   = !empty($options->targettype)  ? strval($options->targettype)  : $token->targettype;
+        $token->timelimited  = !empty($options->timelimited) ? intval($options->timelimited) : $token->timelimited;
+        $token->token        = !empty($options->token)       ? strval($options->token)       : $token->token;
         $token->timemodified = time();
 
-        if (isset($options->enabled)) {
-            $token->enabled = boolval($options->enabled);
-        }
-
-        if (isset($options->extendedaction) && isset($options->extendedoptions)) {
+        if (!empty($options->extendedaction) && !empty($options->extendedoptions)) {
             $token->extendedaction  = strval($options->extendedaction);
             $token->extendedoptions = strval($options->extendedoptions);
-        }
-
-        if (isset($options->limited)) {
-            $token->limited = intval($options->limited);
-        }
-
-        if (isset($options->targetid)) {
-            $token->targetid = intval($options->targetid);
-        }
-
-        if (isset($options->targettype)) {
-            $token->targettype = strval($options->targettype);
-        }
-
-        if (isset($options->token)) {
-            $token->token = strval($options->token);
-        }
-
-        if (isset($options->timelimited)) {
-            $token->timelimited = intval($options->timelimited);
         }
 
         $result = $DB->update_record("tool_managertokens_tokens", $token, false);
